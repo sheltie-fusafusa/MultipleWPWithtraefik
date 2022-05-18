@@ -1,0 +1,25 @@
+services:
+  wordpress:
+    image: wordpress:latest
+    volumes:
+      - "./data/wordpress:/var/www/html"
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    networks:
+      traefik:
+        ipv4_address: 192.168.1.11
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: 192.168.1.10:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.wordpress.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.wordpress.entrypoints=https
+      - traefik.http.routers.wordpress.tls=true
+      - traefik.http.routers.wordpress.tls.certresolver=${CERT_RESOLVER}
+      
+networks:
+  traefik:
+    external: true

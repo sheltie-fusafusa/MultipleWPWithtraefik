@@ -1,0 +1,27 @@
+services:
+  wordpress_tech:
+    image: wordpress:latest
+    volumes:
+      - "./www:/var/www/html"
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    networks:
+      traefik:
+        ipv4_address: 192.168.1.12
+    restart: always
+    working_dir: /var/www/html/tech
+    environment:
+      WORDPRESS_DB_HOST: 192.168.1.10:3306
+      WORDPRESS_DB_NAME: wordpress_tech
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME','https://${DOMAIN}/tech');
+        define('WP_SITEURL','https://${DOMAIN}/tech');
+    labels:
+      - traefik.http.routers.wordpress_tech.rule=Host(`${DOMAIN}`) && PathPrefix(`/tech/`)
+      - traefik.http.routers.wordpress_tech.entrypoints=https
+      - traefik.http.routers.wordpress_tech.tls=true
+      - traefik.http.routers.wordpress_tech.tls.certresolver=${CERT_RESOLVER}
+networks:
+  traefik:
+    external: true
